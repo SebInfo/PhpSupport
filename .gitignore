@@ -1,0 +1,11 @@
+# Dépendances PHP générées par Composer
+/vendor/
+
+# Fichiers locaux sensibles ou propres à la machine
+.env
+.env.local
+
+# Fichiers du système et de l'éditeur
+.DS_Store
+.idea/
+.vscode/
