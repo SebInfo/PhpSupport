@@ -1,6 +1,14 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+/**
+ * Échappe un texte avant de l'insérer dans le HTML.
+ */
+function e(string $texte): string
+{
+    return htmlspecialchars($texte, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
 $configuration = require __DIR__ . '/../config/database.php';
 $pdo = new PDO(
     $configuration['dsn'],
@@ -10,7 +18,8 @@ $pdo = new PDO(
 );
 
 $listeTaches = new App\ListeTaches($pdo);
-$titreSaisi = '';
+$titre = '';
+$erreur = '';
 $message = '';
 
 if (isset($_GET['message']) && $_GET['message'] === 'ajoutee') {
@@ -29,21 +38,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'ajouter') {
-        if (!isset($_POST['titre']) || !is_string($_POST['titre'])) {
-            $message = 'Le titre envoyé est invalide.';
-        } elseif (!mb_check_encoding($_POST['titre'], 'UTF-8')) {
-            $message = 'Le titre doit être encodé en UTF-8.';
-        } else {
-            $titreSaisi = trim($_POST['titre']);
-            $longueurTitre = mb_strlen($titreSaisi, 'UTF-8');
+        $brut = $_POST['titre'] ?? '';
+        $titre = is_string($brut) && mb_check_encoding($brut, 'UTF-8')
+            ? mb_trim($brut, null, 'UTF-8')
+            : '';
 
-            if ($longueurTitre < 1 || $longueurTitre > 120) {
-                $message = 'Le titre doit contenir entre 1 et 120 caractères.';
-            } else {
-                $listeTaches->ajouter($titreSaisi);
-                header('Location: index.php?message=ajoutee', true, 303);
-                exit;
-            }
+        if ($titre === '' || mb_strlen($titre, 'UTF-8') > 120) {
+            http_response_code(422);
+            $erreur = 'Le titre doit contenir entre 1 et 120 caractères.';
+        } else {
+            $listeTaches->ajouter($titre);
+            header('Location: index.php?message=ajoutee', true, 303);
+            exit;
         }
     } elseif (
         !isset($_POST['id'])
@@ -72,7 +78,7 @@ $taches = $listeTaches->toutes();
 <ul>
     <?php foreach ($taches as $tache): ?>
         <li>
-            <?= htmlspecialchars($tache['titre'], ENT_QUOTES, 'UTF-8') ?>
+            <?= e($tache['titre']) ?>
 
             <?php if ((int) $tache['terminee'] === 1): ?>
                 <strong>Terminée</strong>
@@ -94,17 +100,20 @@ $taches = $listeTaches->toutes();
 </ul>
 
 <?php if ($message !== ''): ?>
-    <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
+    <p><?= e($message) ?></p>
 <?php endif; ?>
 
 <form method="post" id="formulaire-tache">
     <input type="hidden" name="action" value="ajouter">
     <label for="titre">Nouvelle tâche</label>
+    <?php if ($erreur !== ''): ?>
+        <p role="alert"><?= e($erreur) ?></p>
+    <?php endif; ?>
     <input
         type="text"
         id="titre"
         name="titre"
-        value="<?= htmlspecialchars($titreSaisi, ENT_QUOTES, 'UTF-8') ?>"
+        value="<?= e($titre) ?>"
         required
         maxlength="120"
     >
