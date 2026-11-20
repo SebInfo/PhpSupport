@@ -2,14 +2,20 @@
 
 namespace App;
 
+use PDO;
+
 class ListeTaches
 {
-    public static function toutes(): array
+    public function __construct(private PDO $pdo)
     {
-        return [
-            "Installer PHP",
-            "Configurer VS Code",
-            "Créer mon projet"
-        ];
+    }
+
+    public function toutes(): array
+    {
+        $requete = $this->pdo->query(
+            'SELECT id, titre, terminee FROM taches ORDER BY id'
+        );
+
+        return $requete->fetchAll(PDO::FETCH_ASSOC);
     }
 }

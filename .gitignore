@@ -4,6 +4,7 @@
 # Fichiers locaux sensibles ou propres à la machine
 .env
 .env.local
+/config/database.php
 
 # Fichiers du système et de l'éditeur
 .DS_Store

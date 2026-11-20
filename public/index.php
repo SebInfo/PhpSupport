@@ -1,6 +1,15 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+$configuration = require __DIR__ . '/../config/database.php';
+$pdo = new PDO(
+    $configuration['dsn'],
+    $configuration['utilisateur'],
+    $configuration['mot_de_passe'],
+    [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+);
+
+$listeTaches = new App\ListeTaches($pdo);
 $titreSaisi = '';
 $message = '';
 
@@ -21,13 +30,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$taches = App\ListeTaches::toutes();
+$taches = $listeTaches->toutes();
 ?>
 <h1>Mes tâches</h1>
 
 <ul>
     <?php foreach ($taches as $tache): ?>
-        <li><?= htmlspecialchars($tache, ENT_QUOTES, 'UTF-8') ?></li>
+        <li><?= htmlspecialchars($tache['titre'], ENT_QUOTES, 'UTF-8') ?></li>
     <?php endforeach; ?>
 </ul>
 

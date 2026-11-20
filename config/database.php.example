@@ -1,0 +1,7 @@
+<?php
+
+return [
+    'dsn' => 'mysql:host=127.0.0.1;dbname=atelier_php;charset=utf8mb4',
+    'utilisateur' => 'root',
+    'mot_de_passe' => '',
+];
