@@ -75,6 +75,10 @@ $taches = $listeTaches->toutes();
 ?>
 <h1>Mes tâches</h1>
 
+<nav aria-label="Navigation principale">
+    <a href="clients.php">Gérer les clients</a>
+</nav>
+
 <ul>
     <?php foreach ($taches as $tache): ?>
         <li>
