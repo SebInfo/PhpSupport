@@ -2,44 +2,49 @@
 
 namespace App;
 
+use Medoo\Medoo;
 use PDO;
 
 class ListeTaches
 {
-    public function __construct(private PDO $pdo)
+    private Medoo $baseDeDonnees;
+
+    public function __construct(PDO $pdo)
     {
+        $this->baseDeDonnees = new Medoo([
+            'type' => 'mysql',
+            'pdo' => $pdo,
+        ]);
     }
 
     public function toutes(): array
     {
-        $requete = $this->pdo->query(
-            'SELECT id, titre, terminee FROM taches ORDER BY id'
-        );
-
-        return $requete->fetchAll(PDO::FETCH_ASSOC);
+        return $this->baseDeDonnees->select(
+            'taches',
+            ['id', 'titre', 'terminee'],
+            ['ORDER' => ['id' => 'ASC']]
+        ) ?? [];
     }
 
     public function ajouter(string $titre): void
     {
-        $requete = $this->pdo->prepare(
-            'INSERT INTO taches (titre, terminee) VALUES (:titre, 0)'
-        );
-        $requete->execute(['titre' => $titre]);
+        $this->baseDeDonnees->insert('taches', [
+            'titre' => $titre,
+            'terminee' => 0,
+        ]);
     }
 
     public function terminer(int $id): void
     {
-        $requete = $this->pdo->prepare(
-            'UPDATE taches SET terminee = 1 WHERE id = :id'
+        $this->baseDeDonnees->update(
+            'taches',
+            ['terminee' => 1],
+            ['id' => $id]
         );
-        $requete->execute(['id' => $id]);
     }
 
     public function supprimer(int $id): void
     {
-        $requete = $this->pdo->prepare(
-            'DELETE FROM taches WHERE id = :id'
-        );
-        $requete->execute(['id' => $id]);
+        $this->baseDeDonnees->delete('taches', ['id' => $id]);
     }
 }
