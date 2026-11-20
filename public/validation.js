@@ -2,8 +2,8 @@ const formulaire = document.querySelector('#formulaire-tache');
 const champTitre = document.querySelector('#titre');
 
 function verifierTitre() {
-    if (champTitre.value.trim() === '' && champTitre.value !== '') {
-        champTitre.setCustomValidity('Le titre ne peut pas contenir uniquement des espaces.');
+   if (champTitre.value.trim() === '') {
+        champTitre.setCustomValidity('Saisissez un titre.');
     } else {
         champTitre.setCustomValidity('');
     }
