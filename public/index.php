@@ -1,6 +1,26 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
+$titreSaisi = '';
+$message = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!isset($_POST['titre']) || !is_string($_POST['titre'])) {
+        $message = 'Le titre envoyé est invalide.';
+    } elseif (!mb_check_encoding($_POST['titre'], 'UTF-8')) {
+        $message = 'Le titre doit être encodé en UTF-8.';
+    } else {
+        $titreSaisi = trim($_POST['titre']);
+        $longueurTitre = mb_strlen($titreSaisi, 'UTF-8');
+
+        if ($longueurTitre < 1 || $longueurTitre > 120) {
+            $message = 'Le titre doit contenir entre 1 et 120 caractères.';
+        } else {
+            $message = 'Le titre est valide. Il sera enregistré à l’étape suivante.';
+        }
+    }
+}
+
 $taches = App\ListeTaches::toutes();
 ?>
 <h1>Mes tâches</h1>
@@ -11,9 +31,20 @@ $taches = App\ListeTaches::toutes();
     <?php endforeach; ?>
 </ul>
 
+<?php if ($message !== ''): ?>
+    <p><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></p>
+<?php endif; ?>
+
 <form method="post" id="formulaire-tache">
     <label for="titre">Nouvelle tâche</label>
-    <input type="text" id="titre" name="titre" required maxlength="120">
+    <input
+        type="text"
+        id="titre"
+        name="titre"
+        value="<?= htmlspecialchars($titreSaisi, ENT_QUOTES, 'UTF-8') ?>"
+        required
+        maxlength="120"
+    >
     <button type="submit">Ajouter</button>
 </form>
 
